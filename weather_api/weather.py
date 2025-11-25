@@ -1,36 +1,48 @@
 # Direct Supply Kata Problem 2  -  Weather API
-# Josiah Mathews - MSOE Computer Science Student
+# Josiah Mathews - MSOE Computer Science Sophomore
 
 from tabulate import tabulate   # Nice table formatting!
 import requests   # API Calls thorough requests
 
-# Note: This API Key MAY need to be changed per tester for updated API access!
+# Note: This API Key MAY need to be CHANGED per tester for updated API access!
 #        Please sign up on the website: https://api.openweathermap.org to gain the quick API iff need be.
 API_KEY = '9030a27dd426ba57c5700baaf9bf2043'
 
 GEO_URL = 'https://api.openweathermap.org/geo/1.0/direct?q='  #GEO API for City name rather than Long/Lat params [same source]
 LAT_LONG_URL = 'https://api.openweathermap.org/data/2.5/weather?'  #Standard API for found Long/Lat params [same source]
 
-"""
-"""
+
 def get_lat_lon(city):
-    # TODO TRY to Grab city's Longitude and Latitude from GEO API
-    # TODO add check and Clean Response
+    """
+    Fetch latitude and longitude for a given city using OpenWeatherMap GEOcoding API.
+
+    :param city: (str): Name of the city to look up from user.
+    :return: tuple: (latitude, longitude) as values are pulled from API, otherwise (None, None).
+    """
+
     response = requests.get(GEO_URL + city + '&limit=1' + '&appid=' + API_KEY)
 
-    if response.status_code == 200:  # successful API Call
-        # Parse only Longitude and Latitude from valid City!
-        lat = str(response.json()[0]['lat'])
-        lon = str(response.json()[0]['lon'])
-        return lat, lon
+    if response.status_code == 200:  # successful API Connection
+        data = response.json()
+        lat = None
+        lon = None
 
-    return None, None
+        if data: # rule out invalid city names
+            # Parse only Longitude and Latitude from valid City!
+            lat = str(response.json()[0]['lat'])
+            lon = str(response.json()[0]['lon'])
+
+    return lat, lon  #none, none return by default
 
 
-"""
-"""
 def get_weather(latitude, longitude):
-    # TODO TRY to Call API with valid lat & lon from specific City
+    """
+    Fetch current weather details for a given latitude and longitude using OpenWeatherMap API.
+    :param latitude:  Latitude of the City.
+    :param longitude: Longitude of the City.
+    :return: str: A formatted table (string) of weather details using Tabulate if successful,
+             otherwise None.
+    """
     response = requests.get(LAT_LONG_URL + "&lat=" + latitude + "&lon=" + longitude + '&appid=' + API_KEY + '&units=imperial')   # imperial Units = Fahrenheit according to API JSON Fields
 
     if response.status_code == 200:
@@ -61,22 +73,24 @@ def get_weather(latitude, longitude):
     return None  # API Error
 
 
-# TODO Add main input() method!!
 # Script 'Main' method
 if __name__ == '__main__':
-    city = input('Enter City: ')
-    latitude, longitude = get_lat_lon(city)
+    city = input('Enter valid City (or "DONE" to exit Weather Program): ')
+    while city.lower() != 'done':  # APP Loop
+        if len(city) > 2:    # no one-two letter entries  (trying to prevent shorter entries for more accuracy from API!)
+            latitude, longitude = get_lat_lon(city)
 
-    if latitude and longitude: #not null
-        table = get_weather(latitude, longitude)
+            if latitude and longitude: #not null
+                table = get_weather(latitude, longitude)
 
-        if table:
-            print(table)
-        else:
-            print("Error fetching City's Weather data.")
-    else:
-        print("City not found.")
+                if table:
+                    print(table)
+                else:
+                    print("Error fetching City's Weather data.")
+            else:
+                print("City not found.")
+
+        city = input('\nEnter valid City (or "DONE" to exit Weather Program): ')  # Re-prompt
 
 
-# TODO update README with .venv instructions and overall output
 # TODO create TESTS?
