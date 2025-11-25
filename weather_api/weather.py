@@ -91,6 +91,3 @@ if __name__ == '__main__':
                 print("City not found.")
 
         city = input('\nEnter valid City (or "DONE" to exit Weather Program): ')  # Re-prompt
-
-
-# TODO create TESTS?
